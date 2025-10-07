@@ -113,8 +113,8 @@ def unary_atanh(input_tensor: ttnn.Tensor) -> ttnn.Tensor:
 
     return ttnn.generic_op([input_tensor, output_tensor], program_descriptor)
 
-# Tiny sanity run (optional)
-def _demo():
+
+def main():
     dev = ttnn.open_device(device_id=0)
     x = torch.rand(64, 64, dtype=torch.bfloat16)  # 2×2 tiles
     x_tt = ttnn.from_torch(x, device=dev, dtype=ttnn.bfloat16, layout=ttnn.TILE_LAYOUT)
@@ -124,4 +124,4 @@ def _demo():
     print("allclose:", torch.allclose(y, ref, rtol=1e-2, atol=1e-2))
 
 if __name__ == "__main__":
-    _demo()
+    main()
