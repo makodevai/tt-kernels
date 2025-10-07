@@ -49,8 +49,12 @@ def compute(input_tensor: ttnn.Tensor) -> ttnn.Tensor:
     writer_ct = ttnn.TensorAccessorArgs(output_tensor).get_compile_time_args()
 
     # --- Tile count ---
-    B, D = input_tensor.shape
-    num_tiles = (B // 32) * (D // 32)
+    B, D = x.shape
+
+    # tiles count
+    Mt = B // 32
+    Nt = D // 32
+    num_tiles = max(1, Mt * Nt)
 
     # --- RT/CT args ---
     reader_rt  = [[input_tensor.buffer_address(),  num_tiles]]
@@ -92,8 +96,28 @@ def compute(input_tensor: ttnn.Tensor) -> ttnn.Tensor:
 
     return ttnn.generic_op([input_tensor, output_tensor], prog)
 
+def get_inputs(case: int):
+    B = D = 32
+    if case == 0:
+        B = D = 1
+    elif case == 1:
+        B = 1
+        D = 2
+    elif case == 2:
+        B = 2
+        D = 1
+    elif case == 3:
+        B = 2
+        D = 2
+    elif case == 4:
+        B = D = 64
+
+    return (B, D)
+
 def main():
     dev = ttnn.open_device(device_id=0)
+    case = 4
+    size = get_inputs(case=case)
 
     # keep a safe margin above 1 to avoid extreme conditioning in BF16
     x = 1.0 + 0.5 * torch.rand(64, 64, dtype=torch.bfloat16)  # ∈ [1, 1.5)

@@ -64,7 +64,7 @@ def unary_atanh(input_tensor: ttnn.Tensor) -> ttnn.Tensor:
 
     # ---- Tiles count (FIXED: use input shape, not H/W) ----
     B, D = input_tensor.shape
-    assert B % 32 == 0 and D % 32 == 0, "Pad to multiples of 32"
+
     Mt = B // 32
     Nt = D // 32
     num_tiles = max(1, Mt * Nt)
@@ -114,9 +114,29 @@ def unary_atanh(input_tensor: ttnn.Tensor) -> ttnn.Tensor:
     return ttnn.generic_op([input_tensor, output_tensor], program_descriptor)
 
 
+def get_inputs(case: int):
+    B = D = 32
+    if case == 0:
+        B = D = 1
+    elif case == 1:
+        B = 1
+        D = 2
+    elif case == 2:
+        B = 2
+        D = 1
+    elif case == 3:
+        B = 2
+        D = 2
+
+
+    return (B, D)
+
+
 def main():
     dev = ttnn.open_device(device_id=0)
-    x = torch.rand(64, 64, dtype=torch.bfloat16)  # 2×2 tiles
+    case = 2
+    size = get_inputs(case=case)
+    x = torch.rand(size, dtype=torch.bfloat16)  # 2×2 tiles
     x_tt = ttnn.from_torch(x, device=dev, dtype=ttnn.bfloat16, layout=ttnn.TILE_LAYOUT)
     y_tt = unary_atanh(x_tt)
     y = ttnn.to_torch(y_tt, device=dev)

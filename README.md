@@ -3,9 +3,12 @@ Generated kernels from Mako for TT
 
 
 ## Generated kernels
-* atanh
-* acosh
-* asinh
+
+Unary
+* Trigonometric
+    * atanh
+    * acosh
+    * asinh
 
 
 ## How to use

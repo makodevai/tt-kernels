@@ -6,7 +6,7 @@
 #include "compute_kernel_api/common.h"
 #include "compute_kernel_api/tile_move_copy.h"
 
-#include "compute_kernel_api/eltwise_unary/trigonometry.h"
+#include "compute_kernel_api/eltwise_unary/eltwise_unary.h"  
 #include "compute_kernel_api/eltwise_unary/trigonometry.h"  // asinh_tile_init / asinh_tile
 
 namespace NAMESPACE {
