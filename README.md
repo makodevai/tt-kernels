@@ -9,7 +9,8 @@ Unary
     * atanh
     * acosh
     * asinh
-
+* Activations
+    * softsign
 
 ## How to use
 
