@@ -4,6 +4,8 @@ Generated kernels from Mako for TT
 
 ## Generated kernels
 * atanh
+* acosh
+* asinh
 
 
 ## How to use
