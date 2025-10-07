@@ -11,6 +11,7 @@ Unary
     * asinh
 * Activations
     * softsign
+    * hardsigmoid
 
 ## How to use
 
