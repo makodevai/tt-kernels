@@ -20,5 +20,5 @@ Unary
 
 Example
 ```
-python3 kernels/unary/trigonometric/atanh/main.py
+python3 kernels/unary/trigonometric/atanh/host.py
 ```

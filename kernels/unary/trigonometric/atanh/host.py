@@ -19,7 +19,7 @@ write_tiles_src = load_file(WRITE_SRC_PATH)
 compute_src = load_file(COMPUTE_SRC_PATH)
 
 
-def unary_atanh(input_tensor: ttnn.Tensor) -> ttnn.Tensor:
+def host(input_tensor: ttnn.Tensor) -> ttnn.Tensor:
     """
     Runs elementwise atanh on input_tensor using a 3-kernel pipeline.
     Compute kernel expects per_core_tile_cnt as a COMPILE-TIME arg (index 0).
@@ -138,7 +138,7 @@ def main():
     size = get_inputs(case=case)
     x = torch.rand(size, dtype=torch.bfloat16)  # 2×2 tiles
     x_tt = ttnn.from_torch(x, device=dev, dtype=ttnn.bfloat16, layout=ttnn.TILE_LAYOUT)
-    y_tt = unary_atanh(x_tt)
+    y_tt = host(x_tt)
     y = ttnn.to_torch(y_tt, device=dev)
     ref = torch.atanh(x)
     print("allclose:", torch.allclose(y, ref, rtol=1e-2, atol=1e-2))

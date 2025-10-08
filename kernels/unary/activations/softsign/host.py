@@ -9,24 +9,30 @@ def load_file(path: str) -> str:
         return f.read()
 
 ROOT = Path.cwd()
-EXAMPLES_DIR = ROOT / "kernels" / "unary" / "trigonometric" / "asinh"
+EXAMPLES_DIR = ROOT / "kernels" / "unary" / "activations" / "softsign"
 
 READ_SRC_PATH    = EXAMPLES_DIR / "read.cpp"
 WRITE_SRC_PATH   = EXAMPLES_DIR / "write.cpp"
 COMPUTE_SRC_PATH = EXAMPLES_DIR / "compute.cpp"
 
-read_src  = load_file(READ_SRC_PATH)
-write_src = load_file(WRITE_SRC_PATH)
-comp_src  = load_file(COMPUTE_SRC_PATH)
+read_tiles_src = load_file(READ_SRC_PATH)
+write_tiles_src = load_file(WRITE_SRC_PATH)
+compute_src = load_file(COMPUTE_SRC_PATH)
 
-def compute(x: ttnn.Tensor) -> ttnn.Tensor:
-    # Output mirrors input
+def host(x: ttnn.Tensor) -> ttnn.Tensor:
+    """
+    Softsign on TT via 3-kernel pipeline.
+    - Reader RT: [src_base, num_tiles]
+    - Compute CT: [per_core_tile_cnt=num_tiles]
+    - Writer RT: [dst_base, num_tiles]
+    """
+    # Output mirrors input (shape/dtype/layout/device)
     y = ttnn.allocate_tensor_on_device(
         ttnn.Shape(x.shape), ttnn.bfloat16, ttnn.TILE_LAYOUT, x.device()
     )
 
-    # CBs
-    tile_bytes   = 32*32*2
+    # --- CB config ---
+    tile_bytes   = 32 * 32 * 2  # BF16 tile
     tiles_per_cb = 2
     total_bytes  = tiles_per_cb * tile_bytes
     cb_in, cb_out = 0, 16
@@ -40,7 +46,7 @@ def compute(x: ttnn.Tensor) -> ttnn.Tensor:
     in_cb  = ttnn.CBDescriptor(total_size=total_bytes, core_ranges=grid, format_descriptors=[in_fmt])
     out_cb = ttnn.CBDescriptor(total_size=total_bytes, core_ranges=grid, format_descriptors=[out_fmt])
 
-    # --- Tile count ---
+    # --- Tiles count ---
     B, D = x.shape
 
     # tiles count
@@ -48,16 +54,19 @@ def compute(x: ttnn.Tensor) -> ttnn.Tensor:
     Nt = D // 32
     num_tiles = max(1, Mt * Nt)
 
-    # CT/RT args
+    # --- CT/RT args ---
     reader_ct = ttnn.TensorAccessorArgs(x).get_compile_time_args()
     writer_ct = ttnn.TensorAccessorArgs(y).get_compile_time_args()
-    reader_rt = [[x.buffer_address(),  num_tiles]]
-    writer_rt = [[y.buffer_address(),  num_tiles]]
-    compute_ct = [num_tiles]  # per_core_tile_cnt
-    compute_rt = []
 
+    reader_rt = [[x.buffer_address(), num_tiles]]
+    writer_rt = [[y.buffer_address(), num_tiles]]
+
+    compute_ct = [num_tiles]  # per_core_tile_cnt for compute
+    compute_rt = []           # none
+
+    # --- Kernel descriptors ---
     reader_k = ttnn.KernelDescriptor(
-        kernel_source=read_src,
+        kernel_source=read_tiles_src,
         source_type=ttnn._ttnn.program_descriptor.SourceType.SOURCE_CODE,
         core_ranges=grid,
         compile_time_args=reader_ct,
@@ -65,7 +74,7 @@ def compute(x: ttnn.Tensor) -> ttnn.Tensor:
         config=ttnn.ReaderConfigDescriptor(),
     )
     compute_k = ttnn.KernelDescriptor(
-        kernel_source=comp_src,
+        kernel_source=compute_src,
         source_type=ttnn._ttnn.program_descriptor.SourceType.SOURCE_CODE,
         core_ranges=grid,
         compile_time_args=compute_ct,
@@ -73,7 +82,7 @@ def compute(x: ttnn.Tensor) -> ttnn.Tensor:
         config=ttnn.ComputeConfigDescriptor(),
     )
     writer_k = ttnn.KernelDescriptor(
-        kernel_source=write_src,
+        kernel_source=write_tiles_src,
         source_type=ttnn._ttnn.program_descriptor.SourceType.SOURCE_CODE,
         core_ranges=grid,
         compile_time_args=writer_ct,
@@ -90,7 +99,7 @@ def compute(x: ttnn.Tensor) -> ttnn.Tensor:
     return ttnn.generic_op([x, y], prog)
 
 def get_inputs(case: int):
-    B = D = 32
+    B = D = 64
     if case == 0:
         B = D = 1
     elif case == 1:
@@ -102,28 +111,23 @@ def get_inputs(case: int):
     elif case == 3:
         B = 2
         D = 2
-    elif case == 4:
-        B = D = 64
-
     return (B, D)
 
-
+# Tiny check vs PyTorch reference (Softsign: x / (1 + |x|))
 def main():
     dev = ttnn.open_device(device_id=0)
+    # Any real inputs are okay; BF16 precision acceptable
     case = 5
     size = get_inputs(case=case)
 
-    # keep a safe margin above 1 to avoid extreme conditioning in BF16
-    x = 1.0 + 0.5 * torch.rand(64, 64, dtype=torch.bfloat16)  # ∈ [1, 1.5)
-    x_tt = ttnn.from_torch(x, device=dev, dtype=ttnn.bfloat16, layout=ttnn.TILE_LAYOUT)
+    X = (torch.rand(size) - 0.5).to(torch.bfloat16)
+    Xtt = ttnn.from_torch(X, device=dev, dtype=ttnn.bfloat16, layout=ttnn.TILE_LAYOUT)
+    Ytt = host(Xtt)
+    Y = ttnn.to_torch(Ytt, device=dev)
 
-    y_tt = compute(x_tt)            # your acosh pipeline
-    y = ttnn.to_torch(y_tt, device=dev)
-
-    ref = torch.asinh(x).to(torch.bfloat16)  # BF16 match
-    print("max_err:", torch.max(torch.abs(y - ref)))
-    print("allclose:", torch.allclose(y, ref, rtol=1e-2, atol=1e-2))
-
+    ref = torch.nn.functional.softsign(X).to(torch.bfloat16)
+    print("max_err:", torch.max(torch.abs(Y - ref)))
+    print("allclose:", torch.allclose(Y, ref, rtol=1e-2, atol=1e-2))
 
 if __name__ == "__main__":
     main()
