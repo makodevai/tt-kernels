@@ -11,7 +11,7 @@ ROOT = Path(__file__).parent.parent.parent
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
-from examples.composable.sqrt.host import host as sqrt_host
+from kernels.composable.sqrt.host import host as sqrt_host
 
 REF_FN = ttnn.sqrt
 MAKO_HOST_AND_KERNEL = sqrt_host 

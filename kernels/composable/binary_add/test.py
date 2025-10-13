@@ -11,7 +11,7 @@ ROOT = Path(__file__).parent.parent.parent
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
-from examples.composable.binary_add.host import add as custom_add
+from kernels.composable.binary_add.host import add as custom_add
 
 REF_FN = ttnn.add
 MAKO_KERNEL = custom_add
