@@ -15,6 +15,12 @@ from kernels.composable.square.host import host as square_host
 from kernels.composable.sqrt.host import host as sqrt_host
 from kernels.composable.binary_add.host import add as add_host
 
+import random
+
+# Set seeds for reproducibility
+torch.manual_seed(42)
+random.seed(42)
+
 def get_inputs(case: int):
     """
     Returns a square-ish tile-multiple shape (B, D) used for BOTH inputs A and B.

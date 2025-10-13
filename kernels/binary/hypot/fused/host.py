@@ -6,6 +6,9 @@ from pathlib import Path
 import sys
 import random
 
+# Set seeds for reproducibility
+torch.manual_seed(42)
+random.seed(42)
 
 def load_file(path: str) -> str:
     with open(path, "r") as f:

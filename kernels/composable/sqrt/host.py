@@ -3,6 +3,11 @@ import torch
 import ttnn
 import ttnn._ttnn
 from pathlib import Path
+import random
+
+# Set seeds for reproducibility
+torch.manual_seed(42)
+random.seed(42)
 
 def load_file(path: str) -> str:
     with open(path, "r") as f:

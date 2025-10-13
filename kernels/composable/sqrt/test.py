@@ -7,6 +7,10 @@ from pathlib import Path
 import torch
 import ttnn
 
+# Set seeds for reproducibility
+torch.manual_seed(42)
+random.seed(42)
+
 ROOT = Path(__file__).parent.parent.parent
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
@@ -17,7 +21,6 @@ REF_FN = ttnn.sqrt
 MAKO_HOST_AND_KERNEL = sqrt_host 
 
 def main():
-    torch.manual_seed(42)
     shape = (random.randint(1, 64), random.randint(1, 64))
     # For sqrt, we need positive values to avoid NaN
     a = torch.rand(shape, dtype=torch.bfloat16) + 0.1  # ∈ [0.1, 1.1)
