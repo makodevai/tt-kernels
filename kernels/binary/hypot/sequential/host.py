@@ -7,11 +7,13 @@ from pathlib import Path
 # A-1 Import your three building blocks
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from examples.composable.square.host import host as square_host
-from examples.composable.sqrt.host import host as sqrt_host
-from examples.composable.binary_add.host import add as add_host
+ROOT = Path(__file__).parent.parent.parent.parent.parent
+sys.path.append(str(ROOT))
+
+from kernels.composable.square.host import host as square_host
+from kernels.composable.sqrt.host import host as sqrt_host
+from kernels.composable.binary_add.host import add as add_host
 
 def get_inputs(case: int):
     """

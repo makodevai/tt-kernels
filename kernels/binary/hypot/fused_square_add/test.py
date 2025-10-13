@@ -11,7 +11,7 @@ ROOT = Path(__file__).parent.parent.parent.parent
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
-from examples.composable.hypot.fused_square_add.host import fused_square_add_then_sqrt
+from kernels.binary.hypot.fused_square_add.host import fused_square_add_then_sqrt
 
 REF_FN = ttnn.hypot
 MAKO_KERNEL = fused_square_add_then_sqrt

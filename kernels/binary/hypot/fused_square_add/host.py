@@ -9,20 +9,20 @@ def load_file(path: str) -> str:
         return f.read()
 
 ROOT = Path.cwd()
-EXAMPLES_DIR = ROOT / "examples" / "composable" / "hypot" / "fused_square_add"
+KERNELS_DIR = ROOT / "kernels" / "binary" / "hypot" / "fused_square_add"
 
 # Load kernel sources
-compute_src = load_file(EXAMPLES_DIR / "compute.cpp")
+compute_src = load_file(KERNELS_DIR / "compute.cpp")
 
 # Load existing kernels from binary_add
-binary_add_dir = ROOT / "examples" / "composable" / "binary_add"
+binary_add_dir = ROOT / "kernels" / "composable" / "binary_add"
 read_src = load_file(binary_add_dir / "read.cpp")
 write_src = load_file(binary_add_dir / "write.cpp")
 
 # Import sqrt host for the complete hypot operation
 import sys
 sys.path.append(str(ROOT))
-from examples.composable.sqrt.host import host as sqrt_host
+from kernels.composable.sqrt.host import host as sqrt_host
 
 def fused_square_add(input_tensor1: ttnn.Tensor, input_tensor2: ttnn.Tensor) -> ttnn.Tensor:
     # Output tensor mirrors inputs

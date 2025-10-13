@@ -20,5 +20,6 @@ Unary
 
 Example
 ```
-python3 kernels/unary/trigonometric/atanh/host.py
+PYTHONPATH=$PWD python3 '/home/george/tt-kernels/kernels/binary/hypot/fused/test.py'
+PYTHONPATH=$PWD python3 '/home/george/tt-kernels/kernels/binary/hypot/fused/host.py'
 ```

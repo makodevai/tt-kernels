@@ -9,11 +9,11 @@ def load_file(path: str) -> str:
         return f.read()
 
 ROOT = Path.cwd()
-EXAMPLES_DIR = ROOT / "examples" / "composable" / "square"
+KERNELS_DIR = ROOT / "kernels" / "composable" / "square"
 
-READ_SRC_PATH    = EXAMPLES_DIR / "read.cpp"
-WRITE_SRC_PATH   = EXAMPLES_DIR / "write.cpp"
-COMPUTE_SRC_PATH = EXAMPLES_DIR / "compute.cpp"
+READ_SRC_PATH    = KERNELS_DIR / "read.cpp"
+WRITE_SRC_PATH   = KERNELS_DIR / "write.cpp"
+COMPUTE_SRC_PATH = KERNELS_DIR / "compute.cpp"
 
 read_tiles_src = load_file(READ_SRC_PATH)
 write_tiles_src = load_file(WRITE_SRC_PATH)

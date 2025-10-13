@@ -12,24 +12,24 @@ def load_file(path: str) -> str:
         return f.read()
 
 ROOT = Path.cwd()
-EXAMPLES_DIR = ROOT / "examples" / "composable" / "hypot" / "fused"
+KERNELS_DIR = ROOT / "kernels" / "binary" / "hypot" / "fused"
 
 # Load kernel sources
-compute_square_add_src = load_file(ROOT / "examples" / "composable" / "hypot" / "fused_square_add" / "compute.cpp")
-compute_hypot_src = load_file(EXAMPLES_DIR / "compute.cpp")
+compute_square_add_src = load_file(ROOT / "kernels" / "binary" / "hypot" / "fused_square_add" / "compute.cpp")
+compute_hypot_src = load_file(KERNELS_DIR / "compute.cpp")
 
 # Load existing kernels from binary_add
-binary_add_dir = ROOT / "examples" / "composable" / "binary_add"
+binary_add_dir = ROOT / "kernels" / "composable" / "binary_add"
 read_src = load_file(binary_add_dir / "read.cpp")
 write_src = load_file(binary_add_dir / "write.cpp")
 
 # Load sqrt host for partial fusion test
-sqrt_dir = ROOT / "examples" / "composable" / "sqrt"
+sqrt_dir = ROOT / "kernels" / "composable" / "sqrt"
 sys.path.append(str(ROOT))
-from examples.composable.sqrt.host import host as sqrt_host
-from examples.composable.square.host import host as square_host
-from examples.composable.binary_add.host import add as add_host
-from examples.composable.hypot.sequential.host import hypot_host as sequential_hypot_host
+from kernels.composable.sqrt.host import host as sqrt_host
+from kernels.composable.square.host import host as square_host
+from kernels.composable.binary_add.host import add as add_host
+from kernels.binary.hypot.sequential.host import hypot_host as sequential_hypot_host
 
 def fused_hypot(input_tensor1: ttnn.Tensor, input_tensor2: ttnn.Tensor, include_sqrt: bool = True) -> ttnn.Tensor:
     """
