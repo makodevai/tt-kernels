@@ -23,7 +23,7 @@ In simple terms it is `sqrt(x^2 + y^2)`, broken down by using `ttnn::square`, `t
 The `hypot` kernel was generated using the above as building blocks and fusing them incrementally. 
 
 There are three `hypot` kernel implemetation. 
-1. Building the tt-metal kernels using the tt-llk intrinsics, running each host code sequentially. Three host codes, three compute kernels. Saved in [sequential](./kernels/binary/hypot/sequential)
-2. Fusing the add and square. Two host codes, two compute kernels, running each host code sequentially. Saved in [fused_square_add](./kernels/binary/hypot/fused_square_add)
-3. Fusing all three. One host code and one compute kernel. Saved in [fused](./kernels/binary/hypot/fused)
+1. Building the tt-metal kernels using the tt-llk intrinsics, running each host code sequentially. Three host codes, three compute kernels. Saved in [sequential](./sequential)
+2. Fusing the add and square. Two host codes, two compute kernels, running each host code sequentially. Saved in [fused_square_add](./fused_square_add)
+3. Fusing all three. One host code and one compute kernel. Saved in [fused](./fused)
 
